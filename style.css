@@ -52,49 +52,17 @@ body, html {
 }
 
 /* Loader Styling */
-.loader-blend-group {
-    position: relative;
-    width: 90vw;
-    max-width: 400px;
-    aspect-ratio: 1/1; /* Assumes GIF is relatively square */
-    isolation: isolate;
-}
-
-.loader-base-bg {
-    position: absolute;
-    inset: 0;
-    background: var(--bg-color);
-}
-
-#loader-fill {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 0%; /* Will be updated via JS */
-    background: var(--loader-fill-color);
-}
-
-.loader-mask-group {
-    position: absolute;
-    inset: 0;
-    mix-blend-mode: lighten;
-    isolation: isolate;
-}
-
 #loader-gif {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+    width: 150px; /* "make smaller too" */
+    height: auto;
     object-fit: contain;
-    filter: invert(1);
-}
-
-.loader-mask-tint {
-    position: absolute;
-    inset: 0;
-    background: var(--bg-color);
+    /* 
+       GIF is Black background, White shape.
+       invert(1) -> White background, Black shape.
+       mix-blend-mode: multiply -> White disappears, Black stays.
+       opacity(0.85) -> Softens the black to match the dark aesthetic.
+    */
+    filter: invert(1) opacity(0.85);
     mix-blend-mode: multiply;
 }
 
