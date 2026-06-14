@@ -1,0 +1,199 @@
+:root {
+    --bg-color: #FFFDEE;
+    --text-color: #2A2420;
+    --loader-fill-color: #4A3B32;
+    --transition-duration: 1.2s;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-color);
+    font-family: 'Playfair Display', serif;
+    color: var(--text-color);
+    overflow: hidden; /* Prevent scrolling */
+}
+
+/* Fullscreen handling */
+:fullscreen body {
+    background-color: var(--bg-color);
+}
+:-webkit-full-screen body {
+    background-color: var(--bg-color);
+}
+
+/* Base Container Styling */
+#loader-container,
+#prompt-container,
+#video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity var(--transition-duration) ease-in-out;
+    opacity: 1;
+    z-index: 10;
+}
+
+.hidden {
+    opacity: 0 !important;
+    pointer-events: none;
+    z-index: -1 !important;
+}
+
+/* Loader Styling */
+#loader-video {
+    display: none; /* We only use this as a source for the canvas */
+}
+
+#loader-canvas {
+    width: 100%;
+    max-width: 400px; /* Adjust based on loading pattern size */
+    height: auto;
+    object-fit: contain;
+}
+
+/* Prompt Styling */
+.prompt-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.5rem;
+}
+
+.headphone-icon {
+    width: 48px;
+    height: 48px;
+    opacity: 0.8;
+}
+
+.editorial-text {
+    font-size: 1.5rem;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0.05em;
+    opacity: 0.9;
+}
+
+#continue-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    margin-top: 2rem;
+    transition: opacity 0.8s ease-in-out, transform 0.3s ease;
+    opacity: 1;
+}
+
+#continue-btn.hidden {
+    opacity: 0 !important;
+    transform: translateY(-10px);
+    pointer-events: none;
+}
+
+#continue-btn:hover {
+    transform: scale(1.1);
+}
+
+.arrow-icon {
+    width: 32px;
+    height: 32px;
+}
+
+/* Video Container Styling */
+#video-container {
+    z-index: 20;
+    padding: 2vh 2vw; /* "a little bit of space around the video" */
+}
+
+#fullscreen-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    opacity: 0.3;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    z-index: 30;
+}
+
+#fullscreen-btn:hover {
+    opacity: 0.8;
+}
+
+#fullscreen-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+#main-video {
+    /* Responsive logic: height of screen on desktop, width on mobile */
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 4px; /* subtle softening */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05); /* very subtle depth */
+}
+
+/* Custom Play/Pause Overlays */
+#pause-overlay,
+#play-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background-color: rgba(255, 253, 238, 0.6);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-color);
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none; /* Let clicks pass through to video wrapper */
+    backdrop-filter: blur(4px);
+}
+
+#pause-overlay.hidden,
+#play-overlay.hidden {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+}
+
+.pause-icon,
+.play-icon {
+    width: 32px;
+    height: 32px;
+}
+
+/* Media query to enforce width orientation on mobile */
+@media (max-aspect-ratio: 1/1) {
+    #main-video {
+        width: 100%;
+        height: auto;
+    }
+}
