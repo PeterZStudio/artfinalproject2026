@@ -1,9 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Elements ---
     const loaderContainer = document.getElementById('loader-container');
-    const loaderVideo = document.getElementById('loader-video');
-    const loaderCanvas = document.getElementById('loader-canvas');
-    const ctx = loaderCanvas.getContext('2d');
+    const loaderFill = document.getElementById('loader-fill');
     
     const promptContainer = document.getElementById('prompt-container');
     const continueBtn = document.getElementById('continue-btn');
@@ -17,62 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- State ---
     window.currentLoadProgress = 0;
-    let isLoaderPlaying = false;
-    let animationFrameId = null;
     let isPlaying = true; 
 
     // --- 1. Loader Animation Logic ---
-    function startLoaderAnimation() {
-        // Ensure canvas has a default size for the fallback text
-        loaderCanvas.width = 300;
-        loaderCanvas.height = 300;
-
-        loaderVideo.play().catch(e => console.warn("Auto-play prevented or video not supported", e));
-        isLoaderPlaying = true;
-        renderLoader();
-    }
-
-    function renderLoader() {
-        if (!loaderVideo.videoWidth) {
-            // Fallback: If the browser doesn't support .mov, draw a clean text progress
-            ctx.clearRect(0, 0, loaderCanvas.width, loaderCanvas.height);
-            ctx.fillStyle = '#4A3B32';
-            ctx.font = 'italic 24px "Playfair Display", serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            const percentage = Math.min(Math.round(window.currentLoadProgress * 100), 100);
-            ctx.fillText(`Loading... ${percentage}%`, loaderCanvas.width / 2, loaderCanvas.height / 2);
-            
-            animationFrameId = requestAnimationFrame(renderLoader);
-            return;
-        }
-
-        // Once video is ready, match canvas size to video size
-        if (loaderCanvas.width !== loaderVideo.videoWidth) {
-            loaderCanvas.width = loaderVideo.videoWidth;
-            loaderCanvas.height = loaderVideo.videoHeight;
-        }
-
-        ctx.clearRect(0, 0, loaderCanvas.width, loaderCanvas.height);
-        
-        // Draw the loader video (the mask)
-        ctx.drawImage(loaderVideo, 0, 0, loaderCanvas.width, loaderCanvas.height);
-        
-        // Apply the fill color only where the video is opaque
-        ctx.globalCompositeOperation = 'source-in';
-        
-        // Calculate fill height based on progress (0 to 1)
-        const fillHeight = loaderCanvas.height * window.currentLoadProgress;
-        const fillY = loaderCanvas.height - fillHeight;
-        
-        ctx.fillStyle = '#4A3B32';
-        ctx.fillRect(0, fillY, loaderCanvas.width, fillHeight);
-        
-        // Reset composite operation
-        ctx.globalCompositeOperation = 'source-over';
-        
-        animationFrameId = requestAnimationFrame(renderLoader);
+    function updateLoaderFill() {
+        const percentage = Math.min(Math.round(window.currentLoadProgress * 100), 100);
+        loaderFill.style.height = `${percentage}%`;
     }
 
     // --- 2. Asset Preloading ---
@@ -89,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 window.currentLoadProgress = Math.min(window.currentLoadProgress + 0.05, 0.99);
             }
+            updateLoaderFill();
         };
         
         xhr.onload = () => {
@@ -116,9 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 3. Flow Transitions ---
     function transitionToPrompt() {
-        cancelAnimationFrame(animationFrameId);
-        loaderVideo.pause();
-        
         loaderContainer.classList.add('hidden');
         promptContainer.classList.remove('hidden');
         
@@ -190,6 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Start everything
-    startLoaderAnimation();
+    updateLoaderFill();
     preloadMainVideo();
 });

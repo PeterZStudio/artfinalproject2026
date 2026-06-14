@@ -52,15 +52,50 @@ body, html {
 }
 
 /* Loader Styling */
-#loader-video {
-    display: none; /* We only use this as a source for the canvas */
+.loader-blend-group {
+    position: relative;
+    width: 90vw;
+    max-width: 400px;
+    aspect-ratio: 1/1; /* Assumes GIF is relatively square */
+    isolation: isolate;
 }
 
-#loader-canvas {
+.loader-base-bg {
+    position: absolute;
+    inset: 0;
+    background: var(--bg-color);
+}
+
+#loader-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    max-width: 400px; /* Adjust based on loading pattern size */
-    height: auto;
+    height: 0%; /* Will be updated via JS */
+    background: var(--loader-fill-color);
+}
+
+.loader-mask-group {
+    position: absolute;
+    inset: 0;
+    mix-blend-mode: lighten;
+    isolation: isolate;
+}
+
+#loader-gif {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
+    filter: invert(1);
+}
+
+.loader-mask-tint {
+    position: absolute;
+    inset: 0;
+    background: var(--bg-color);
+    mix-blend-mode: multiply;
 }
 
 /* Prompt Styling */

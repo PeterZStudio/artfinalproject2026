@@ -12,9 +12,14 @@
     
     <!-- Loader Screen -->
     <div id="loader-container">
-        <!-- Hidden video used as source for canvas -->
-        <video id="loader-video" src="loading.mov" muted loop playsinline></video>
-        <canvas id="loader-canvas"></canvas>
+        <div class="loader-blend-group">
+            <div class="loader-base-bg"></div>
+            <div id="loader-fill"></div>
+            <div class="loader-mask-group">
+                <img id="loader-gif" src="loading.gif" alt="loading pattern">
+                <div class="loader-mask-tint"></div>
+            </div>
+        </div>
     </div>
 
     <!-- Headphones Prompt -->
