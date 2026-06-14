@@ -19,23 +19,36 @@ document.addEventListener('DOMContentLoaded', () => {
     window.currentLoadProgress = 0;
     let isLoaderPlaying = false;
     let animationFrameId = null;
-    let isPlaying = true; // Main video will start playing automatically after clicking continue
+    let isPlaying = true; 
 
     // --- 1. Loader Animation Logic ---
     function startLoaderAnimation() {
-        if (!isLoaderPlaying) {
-            loaderVideo.play().catch(e => console.warn("Auto-play prevented for loader video", e));
-            isLoaderPlaying = true;
-            renderLoader();
-        }
+        // Ensure canvas has a default size for the fallback text
+        loaderCanvas.width = 300;
+        loaderCanvas.height = 300;
+
+        loaderVideo.play().catch(e => console.warn("Auto-play prevented or video not supported", e));
+        isLoaderPlaying = true;
+        renderLoader();
     }
 
     function renderLoader() {
         if (!loaderVideo.videoWidth) {
+            // Fallback: If the browser doesn't support .mov, draw a clean text progress
+            ctx.clearRect(0, 0, loaderCanvas.width, loaderCanvas.height);
+            ctx.fillStyle = '#4A3B32';
+            ctx.font = 'italic 24px "Playfair Display", serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            const percentage = Math.min(Math.round(window.currentLoadProgress * 100), 100);
+            ctx.fillText(`Loading... ${percentage}%`, loaderCanvas.width / 2, loaderCanvas.height / 2);
+            
             animationFrameId = requestAnimationFrame(renderLoader);
             return;
         }
 
+        // Once video is ready, match canvas size to video size
         if (loaderCanvas.width !== loaderVideo.videoWidth) {
             loaderCanvas.width = loaderVideo.videoWidth;
             loaderCanvas.height = loaderVideo.videoHeight;
@@ -64,8 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 2. Asset Preloading ---
     function preloadMainVideo() {
-        // Original source: "FINAL EDITED FINAL PIECE FUNKY MONKEY ARTY PARTY.mp4"
-        const videoUrl = mainVideo.src;
+        const videoUrl = mainVideo.getAttribute('src');
         
         const xhr = new XMLHttpRequest();
         xhr.open('GET', videoUrl, true);
@@ -75,26 +87,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (event.lengthComputable) {
                 window.currentLoadProgress = event.loaded / event.total;
             } else {
-                // Fallback fake progress if no content length
                 window.currentLoadProgress = Math.min(window.currentLoadProgress + 0.05, 0.99);
             }
         };
         
         xhr.onload = () => {
-            if (xhr.status === 200) {
+            // Accept 200 (OK) or 206 (Partial Content)
+            if (xhr.status >= 200 && xhr.status < 300) {
                 window.currentLoadProgress = 1;
                 const blob = xhr.response;
                 const objectUrl = URL.createObjectURL(blob);
                 mainVideo.src = objectUrl;
-                
-                // Finish loader animation and transition
-                setTimeout(transitionToPrompt, 500); 
+            } else {
+                console.error("Error loading video, status: " + xhr.status);
+                window.currentLoadProgress = 1;
             }
+            setTimeout(transitionToPrompt, 500); 
         };
 
         xhr.onerror = () => {
-            console.error("Error loading video");
-            window.currentLoadProgress = 1; // force transition
+            console.error("XHR Network Error");
+            window.currentLoadProgress = 1; 
             setTimeout(transitionToPrompt, 500);
         };
 
@@ -106,23 +119,16 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelAnimationFrame(animationFrameId);
         loaderVideo.pause();
         
-        // Fade out loader
         loaderContainer.classList.add('hidden');
-        
-        // Fade in prompt
         promptContainer.classList.remove('hidden');
         
-        // Fade in arrow button shortly after
         setTimeout(() => {
             continueBtn.classList.remove('hidden');
         }, 1500);
     }
 
     continueBtn.addEventListener('click', () => {
-        // Fade out prompt
         promptContainer.classList.add('hidden');
-        
-        // Fade in main video
         videoContainer.classList.remove('hidden');
         
         mainVideo.play().then(() => {
@@ -145,42 +151,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showOverlay(overlay) {
         overlay.classList.remove('hidden');
-        // Hide again after a short delay
         setTimeout(() => {
             overlay.classList.add('hidden');
         }, 800);
     }
 
     videoWrapper.addEventListener('click', (e) => {
-        // Prevent toggle if clicking fullscreen btn
         if(e.target.closest('#fullscreen-btn')) return;
         togglePlayPause();
     });
 
     document.addEventListener('keydown', (e) => {
         if (e.code === 'Space' && !videoContainer.classList.contains('hidden')) {
-            e.preventDefault(); // prevent page scroll
+            e.preventDefault();
             togglePlayPause();
         }
     });
 
-    // Fullscreen API
     fullscreenBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // prevent play/pause toggle
+        e.stopPropagation(); 
         if (!document.fullscreenElement) {
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen();
-            } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
+            } else if (document.documentElement.webkitRequestFullscreen) { 
                 document.documentElement.webkitRequestFullscreen();
-            } else if (document.documentElement.msRequestFullscreen) { /* IE11 */
+            } else if (document.documentElement.msRequestFullscreen) { 
                 document.documentElement.msRequestFullscreen();
             }
         } else {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) { /* Safari */
+            } else if (document.webkitExitFullscreen) { 
                 document.webkitExitFullscreen();
-            } else if (document.msExitFullscreen) { /* IE11 */
+            } else if (document.msExitFullscreen) { 
                 document.msExitFullscreen();
             }
         }
