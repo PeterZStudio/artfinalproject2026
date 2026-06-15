@@ -17,10 +17,9 @@ body, html {
     background-color: var(--bg-color);
     font-family: 'Playfair Display', serif;
     color: var(--text-color);
-    overflow: hidden; /* Prevent scrolling */
+    overflow: hidden;
 }
 
-/* Fullscreen handling */
 :fullscreen body {
     background-color: var(--bg-color);
 }
@@ -51,37 +50,20 @@ body, html {
     z-index: -1 !important;
 }
 
-/* Loader Styling */
-.loader-mask-wrapper {
+/* Loader Styling — CSS mask-image uses the GIF as an alpha mask.
+   White pixels in the GIF = visible, Black pixels = transparent. */
+.loader-shape {
     width: 150px;
     height: 150px;
-    position: relative;
-    /* Multiply against the #FFFDEE page background:
-       White becomes #FFFDEE.
-       Brown shape stays Brown. */
-    mix-blend-mode: multiply;
-    isolation: isolate;
-}
-
-.loader-solid-layer {
-    position: absolute;
-    inset: 0;
-    background-color: var(--loader-fill-color); /* The solid color to cut out */
-}
-
-.loader-gif {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    /* GIF starts Black bg, White shape.
-       invert(1) -> White bg, Black shape. */
-    filter: invert(1);
-    /* Lighten against the solid brown layer:
-       White bg stays White.
-       Black shape lets the Brown solid layer show through! */
-    mix-blend-mode: lighten;
+    background-color: var(--loader-fill-color);
+    -webkit-mask-image: url('loading.gif');
+    mask-image: url('loading.gif');
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
 }
 
 /* Prompt Styling */
@@ -135,7 +117,7 @@ body, html {
 /* Video Container Styling */
 #video-container {
     z-index: 20;
-    padding: 2vh 2vw; /* "a little bit of space around the video" */
+    padding: 2vh 2vw;
 }
 
 #fullscreen-btn {
@@ -171,12 +153,11 @@ body, html {
 }
 
 #main-video {
-    /* Responsive logic: height of screen on desktop, width on mobile */
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    border-radius: 4px; /* subtle softening */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05); /* very subtle depth */
+    border-radius: 4px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
 /* Custom Play/Pause Overlays */
@@ -195,7 +176,7 @@ body, html {
     align-items: center;
     color: var(--text-color);
     transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    pointer-events: none; /* Let clicks pass through to video wrapper */
+    pointer-events: none;
     backdrop-filter: blur(4px);
 }
 
@@ -211,7 +192,6 @@ body, html {
     height: 32px;
 }
 
-/* Media query to enforce width orientation on mobile */
 @media (max-aspect-ratio: 1/1) {
     #main-video {
         width: 100%;
